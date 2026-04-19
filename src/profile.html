@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль - Minecraft Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('assets/background.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.3) blur(3px);
+            z-index: -1;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(20,30,48,0.9));
+            z-index: -1;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Шапка */
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #4CAF50;
+        }
+
+        .header h1 {
+            color: #4CAF50;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.8);
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #4CAF50;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.5);
+        }
+
+        /* Контент */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .profile-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        /* Карточка аватара */
+        .avatar-card {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid rgba(76, 175, 80, 0.5);
+            text-align: center;
+            height: fit-content;
+        }
+
+        .avatar-display {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            border: 3px solid #4CAF50;
+            overflow: hidden;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.3);
+            position: relative;
+        }
+
+        .avatar-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: pixelated;
+        }
+
+        .avatar-display canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .username-display {
+            color: #4CAF50;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .user-email {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .user-since {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+        }
+
+        /* Сетка аватаров */
+        .avatar-selector {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .avatar-selector h3 {
+            color: #4CAF50;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .avatar-option {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            overflow: hidden;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .avatar-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: pixelated;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+            border-color: #4CAF50;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        }
+
+        .avatar-option.active {
+            border-color: #4CAF50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+        }
+
+        /* Кнопки загрузки скина */
+        .skin-actions {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .skin-upload-btn,
+        .skin-remove-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .skin-upload-btn {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .skin-upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.5);
+        }
+
+        .skin-remove-btn {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .skin-remove-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(244, 67, 54, 0.5);
+        }
+
+        .skin-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid rgba(33, 150, 243, 0.5);
+            border-radius: 8px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.8);
+            text-align: left;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Информационные карточки */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .info-card h2 {
+            color: #4CAF50;
+            font-size: 20px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(76, 175, 80, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4CAF50;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* Формы редактирования */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #4CAF50;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(76, 175, 80, 0.5);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #000;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #757575, #616161);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #616161, #424242);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+            border: 2px solid #4CAF50;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.3);
+            color: #ff5252;
+            border: 2px solid #ff5252;
+        }
+
+        /* Скролл */
+        .content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.3);
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: rgba(76, 175, 80, 0.5);
+            border-radius: 5px;
+        }
+
+        .content::-webkit-scrollbar-thumb:hover {
+            background: #4CAF50;
+        }
+
+        /* Бейдж кастомного скина */
+        .custom-skin-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <!-- Шапка -->
+        <div class="header">
+            <h1>👤 Профиль пользователя</h1>
+            <button class="back-btn" id="backBtn">← Назад к лаунчеру</button>
+        </div>
+
+        <!-- Контент -->
+        <div class="content">
+            <div class="profile-container">
+                <!-- Левая колонка - Аватар -->
+                <div class="avatar-card">
+                    <div class="avatar-display" id="avatarDisplay">
+                        <canvas id="skinCanvas" width="200" height="200"></canvas>
+                    </div>
+                    <div class="username-display" id="usernameDisplay">
+                        Username
+                        <span class="custom-skin-badge" id="customSkinBadge" style="display: none;">
+                            Свой скин
+                        </span>
+                    </div>
+                    <div class="user-email" id="emailDisplay">email@example.com</div>
+                    <div class="user-since" id="userSince">Зарегистрирован: --</div>
+
+                    <!-- Выбор аватара -->
+                    <div class="avatar-selector">
+                        <h3>Выбрать аватар:</h3>
+                        <div class="avatar-grid" id="avatarGrid">
+                            <!-- Аватары будут добавлены через JS -->
+                        </div>
+                    </div>
+
+                    <!-- Загрузка своего скина -->
+                    <div class="skin-actions">
+                        <input type="file" id="skinFileInput" accept=".png">
+                        <button class="skin-upload-btn" id="uploadSkinBtn">
+                            📁 Загрузить свой скин
+                        </button>
+                        <button class="skin-remove-btn" id="removeSkinBtn" style="display: none;">
+                            🗑️ Удалить свой скин
+                        </button>
+                        <div class="skin-info">
+                            💡 Поддерживаются скины 64x64 и 64x32 пикселей
+                        </div>
+                    </div>
+
+                    <div class="message" id="skinMessage"></div>
+                </div>
+
+                <!-- Правая колонка - Информация -->
+                <div class="info-section">
+                    <!-- Статистика -->
+                    <div class="info-card">
+                        <h2>📊 Статистика</h2>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="launchCount">0</div>
+                                <div class="stat-label">Запусков</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="playtime">0ч</div>
+                                <div class="stat-label">Время в игре</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="lastVersion">-</div>
+                                <div class="stat-label">Последняя версия</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Редактирование email -->
+                    <div class="info-card">
+                        <h2>📧 Изменить Email</h2>
+                        <div class="form-group">
+                            <label>Новый Email:</label>
+                            <input type="email" id="newEmail" placeholder="Введите новый email">
+                        </div>
+                        <button class="btn" id="updateEmailBtn">Сохранить Email</button>
+                        <div class="message" id="emailMessage"></div>
+                    </div>
+
+                    <!-- Смена пароля -->
+                    <div class="info-card">
+                        <h2>🔒 Изменить пароль</h2>
+                        <div class="form-group">
+                            <label>Текущий пароль:</label>
+                            <input type="password" id="currentPassword" placeholder="Введите текущий пароль">
+                        </div>
+                        <div class="form-group">
+                            <label>Новый пароль:</label>
+                            <input type="password" id="newPassword" placeholder="Введите новый пароль">
+                        </div>
+                        <div class="form-group">
+                            <label>Повторите новый пароль:</label>
+                            <input type="password" id="confirmPassword" placeholder="Повторите новый пароль">
+                        </div>
+                        <button class="btn" id="changePasswordBtn">Изменить пароль</button>
+                        <div class="message" id="passwordMessage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Доступные аватары (скины Minecraft)
+        const avatars = [
+            { id: 'steve', name: 'Steve', url: 'https://mc-heads.net/avatar/steve/200' },
+            { id: 'alex', name: 'Alex', url: 'https://mc-heads.net/avatar/alex/200' },
+            { id: 'herobrine', name: 'Herobrine', url: 'https://mc-heads.net/avatar/herobrine/200' },
+            { id: 'notch', name: 'Notch', url: 'https://mc-heads.net/avatar/notch/200' },
+            { id: 'creeper', name: 'Creeper', url: 'https://mc-heads.net/avatar/MHF_Creeper/200' },
+            { id: 'enderman', name: 'Enderman', url: 'https://mc-heads.net/avatar/MHF_Enderman/200' },
+            { id: 'zombie', name: 'Zombie', url: 'https://mc-heads.net/avatar/MHF_Zombie/200' },
+            { id: 'skeleton', name: 'Skeleton', url: 'https://mc-heads.net/avatar/MHF_Skeleton/200' },
+            { id: 'pig', name: 'Pig', url: 'https://mc-heads.net/avatar/MHF_Pig/200' }
+        ];
+
+        let currentUser = null;
+        const canvas = document.getElementById('skinCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Получаем данные пользователя
+        ipcRenderer.on('profile-data', (event, user) => {
+            currentUser = user;
+            console.log('👤 Данные профиля:', user);
+            loadProfile(user);
+        });
+
+        // Загрузка профиля
+        function loadProfile(user) {
+            // Основная информация
+            document.getElementById('usernameDisplay').innerHTML = user.username;
+            document.getElementById('emailDisplay').textContent = user.email;
+            
+            // Дата регистрации
+            const regDate = new Date(user.created_at).toLocaleDateString('ru-RU');
+            document.getElementById('userSince').textContent = `Зарегистрирован: ${regDate}`;
+
+            // Статистика
+            document.getElementById('launchCount').textContent = user.stats.launches || 0;
+            
+            const hours = Math.floor((user.stats.playtime || 0) / 60);
+            const minutes = (user.stats.playtime || 0) % 60;
+            document.getElementById('playtime').textContent = hours > 0 ? `${hours}ч ${minutes}м` : `${minutes}м`;
+            
+            document.getElementById('lastVersion').textContent = user.stats.last_version || '-';
+
+            // Аватар/Скин
+            if (user.customSkin) {
+                // Показываем кастомный скин
+                loadCustomSkin(user.customSkin);
+                document.getElementById('customSkinBadge').style.display = 'inline-block';
+                document.getElementById('removeSkinBtn').style.display = 'block';
+            } else {
+                // Показываем стандартный аватар
+                const avatar = avatars.find(a => a.id === user.avatar) || avatars[0];
+                loadAvatarImage(avatar.url);
+                document.getElementById('customSkinBadge').style.display = 'none';
+                document.getElementById('removeSkinBtn').style.display = 'none';
+            }
+
+            // Загружаем сетку аватаров
+            loadAvatarGrid(user.avatar);
+        }
+
+        // Загрузить изображение аватара
+        function loadAvatarImage(url) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = url;
+        }
+
+        // Загрузить кастомный скин
+        function loadCustomSkin(skinDataUrl) {
+            const img = new Image();
+            img.onload = () => {
+                drawMinecraftSkin(img);
+            };
+            img.src = skinDataUrl;
+        }
+
+        // Отрисовка скина Minecraft (упрощённая 3D модель)
+        function drawMinecraftSkin(skinImg) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.imageSmoothingEnabled = false;
+
+            const scale = 3;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Голова (front face)
+            ctx.drawImage(skinImg, 8, 8, 8, 8, centerX - 32, centerY - 80, 64, 64);
+            
+            // Overlay головы (hat/hair)
+            ctx.drawImage(skinImg, 40, 8, 8, 8, centerX - 36, centerY - 84, 72, 72);
+
+            // Тело (front)
+            ctx.drawImage(skinImg, 20, 20, 8, 12, centerX - 32, centerY - 16, 64, 96);
+
+            // Правая рука
+            ctx.drawImage(skinImg, 44, 20, 4, 12, centerX - 64, centerY - 16, 32, 96);
+
+            // Левая рука (новый формат скинов 64x64)
+            if (skinImg.height === 64) {
+                ctx.drawImage(skinImg, 36, 52, 4, 12, centerX + 32, centerY - 16, 32, 96);
+            } else {
+                // Старый формат 64x32
+                ctx.drawImage(skinImg, 44, 20, 4, 12, centerX + 32, centerY - 16, 32, 96);
+            }
+
+            // Правая нога
+            ctx.drawImage(skinImg, 4, 20, 4, 12, centerX - 32, centerY + 80, 32, 96);
+
+            // Левая нога
+            if (skinImg.height === 64) {
+                ctx.drawImage(skinImg, 20, 52, 4, 12, centerX, centerY + 80, 32, 96);
+            } else {
+                ctx.drawImage(skinImg, 4, 20, 4, 12, centerX, centerY + 80, 32, 96);
+            }
+        }
+
+        // Загрузка сетки аватаров
+        function loadAvatarGrid(currentAvatarId) {
+            const grid = document.getElementById('avatarGrid');
+            grid.innerHTML = '';
+
+            avatars.forEach(avatar => {
+                const avatarEl = document.createElement('div');
+                avatarEl.className = 'avatar-option';
+                if (avatar.id === currentAvatarId && !currentUser.customSkin) {
+                    avatarEl.classList.add('active');
+                }
+
+                const img = document.createElement('img');
+                img.src = avatar.url;
+                img.alt = avatar.name;
+                img.title = avatar.name;
+
+                avatarEl.appendChild(img);
+
+                avatarEl.addEventListener('click', () => {
+                    selectAvatar(avatar);
+                });
+
+                grid.appendChild(avatarEl);
+            });
+        }
+
+        // Выбор аватара
+        async function selectAvatar(avatar) {
+            console.log('🎨 Выбран аватар:', avatar.name);
+
+            // Сначала удаляем кастомный скин если есть
+            if (currentUser.customSkin) {
+                await ipcRenderer.invoke('remove-custom-skin');
+                currentUser.customSkin = null;
+            }
+
+            const result = await ipcRenderer.invoke('update-avatar', avatar.id);
+
+            if (result.success) {
+                loadAvatarImage(avatar.url);
+                
+                // Обновляем активный класс
+                document.querySelectorAll('.avatar-option').forEach(el => {
+                    el.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+
+                document.getElementById('customSkinBadge').style.display = 'none';
+                document.getElementById('removeSkinBtn').style.display = 'none';
+
+                showMessage('skinMessage', 'Аватар изменён!', 'success');
+            } else {
+                showMessage('skinMessage', result.error, 'error');
+            }
+        }
+
+        // Загрузка своего скина
+        document.getElementById('uploadSkinBtn').addEventListener('click', () => {
+            document.getElementById('skinFileInput').click();
+        });
+
+        document.getElementById('skinFileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Проверяем тип файла
+            if (!file.type.match('image/png')) {
+                showMessage('skinMessage', 'Только PNG файлы!', 'error');
+                return;
+            }
+
+            // Читаем файл
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const img = new Image();
+                img.onload = async () => {
+                    // Проверяем размер
+                    if ((img.width === 64 && (img.height === 64 || img.height === 32))) {
+                        // Сохраняем скин
+                        const result = await ipcRenderer.invoke('save-custom-skin', event.target.result);
+
+                        if (result.success) {
+                            currentUser.customSkin = event.target.result;
+                            currentUser.skinPath = result.skinPath;
+                            drawMinecraftSkin(img);
+                            
+                            // Устанавливаем скин в Minecraft
+                            const installResult = await ipcRenderer.invoke('install-skin', result.skinPath, currentUser.username);
+                            
+                            if (installResult.success) {
+                                console.log('✅ Скин установлен в игру');
+                            }
+                            
+                            // Убираем активность у стандартных аватаров
+                            document.querySelectorAll('.avatar-option').forEach(el => {
+                                el.classList.remove('active');
+                            });
+
+                            document.getElementById('customSkinBadge').style.display = 'inline-block';
+                            document.getElementById('removeSkinBtn').style.display = 'block';
+
+                            showMessage('skinMessage', '✅ Скин загружен и установлен в игру!', 'success');
+                        } else {
+                            showMessage('skinMessage', result.error, 'error');
+                        }
+                    } else {
+                        showMessage('skinMessage', `Неверный размер: ${img.width}x${img.height}. Нужен 64x64 или 64x32`, 'error');
+                    }
+                };
+                img.onerror = () => {
+                    showMessage('skinMessage', 'Ошибка загрузки изображения', 'error');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Очищаем input
+            e.target.value = '';
+        });
+
+        // Удаление своего скина
+        document.getElementById('removeSkinBtn').addEventListener('click', async () => {
+            if (!confirm('Удалить свой скин и вернуться к стандартному аватару?')) {
+                return;
+            }
+
+            const result = await ipcRenderer.invoke('remove-custom-skin');
+
+            if (result.success) {
+                currentUser.customSkin = null;
+                
+                // Загружаем стандартный аватар
+                const avatar = avatars.find(a => a.id === currentUser.avatar) || avatars[0];
+                loadAvatarImage(avatar.url);
+
+                document.getElementById('customSkinBadge').style.display = 'none';
+                document.getElementById('removeSkinBtn').style.display = 'none';
+
+                // Восстанавливаем активность стандартного аватара
+                loadAvatarGrid(currentUser.avatar);
+
+                showMessage('skinMessage', '✅ Скин удалён', 'success');
+            } else {
+                showMessage('skinMessage', result.error, 'error');
+            }
+        });
+
+        // Изменение email
+        document.getElementById('updateEmailBtn').addEventListener('click', async () => {
+            const newEmail = document.getElementById('newEmail').value.trim();
+            const messageEl = document.getElementById('emailMessage');
+
+            if (!newEmail) {
+                showMessage(messageEl, 'Введите новый email', 'error');
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+                showMessage(messageEl, 'Неверный формат email', 'error');
+                return;
+            }
+
+            const result = await ipcRenderer.invoke('update-email', newEmail);
+
+            if (result.success) {
+                showMessage(messageEl, result.message, 'success');
+                document.getElementById('emailDisplay').textContent = newEmail;
+                document.getElementById('newEmail').value = '';
+            } else {
+                showMessage(messageEl, result.error, 'error');
+            }
+        });
+
+        // Смена пароля
+        document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const messageEl = document.getElementById('passwordMessage');
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showMessage(messageEl, 'Заполните все поля', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showMessage(messageEl, 'Пароль должен быть минимум 6 символов', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showMessage(messageEl, 'Пароли не совпадают', 'error');
+                return;
+            }
+
+            const result = await ipcRenderer.invoke('change-password', {
+                oldPassword: currentPassword,
+                newPassword: newPassword
+            });
+
+            if (result.success) {
+                showMessage(messageEl, result.message, 'success');
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+            } else {
+                showMessage(messageEl, result.error, 'error');
+            }
+        });
+
+        // Назад
+        document.getElementById('backBtn').addEventListener('click', () => {
+            ipcRenderer.send('close-profile');
+        });
+
+        // Показать сообщение
+        function showMessage(element, text, type) {
+            if (typeof element === 'string') {
+                element = document.getElementById(element);
+            }
+            element.textContent = text;
+            element.className = 'message ' + type;
+            element.style.display = 'block';
+
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        console.log('✅ Profile.html загружен');
+    </script>
+</body>
+</html>

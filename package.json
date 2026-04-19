@@ -1,0 +1,82 @@
+{
+  "name": "minecraft-launcher",
+  "version": "1.0.0",
+  "description": "Custom Minecraft Launcher with auto-update and cloud sync",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "publish": "electron-builder --publish always",
+    "pack": "electron-builder --dir"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/neplohoj57/minecraft-launcher.git"
+  },
+  "keywords": [
+    "minecraft",
+    "launcher",
+    "electron"
+  ],
+  "author": "ivan_vertikov@mail.ru",
+  "license": "MIT",
+  "build": {
+    "appId": "com.minecraft.launcher",
+    "productName": "Minecraft Launcher",
+    "copyright": "Copyright © 2024",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "publisherName": "ivan",
+      "verifyUpdateCodeSignature": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Minecraft Launcher",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "neplohoj57",
+      "repo": "minecraft-launcher",
+      "private": false,
+      "releaseType": "release"
+    },
+    "files": [
+      "**/*",
+      "!data/**/*",
+      "!minecraft/**/*",
+      "!.git/**/*",
+      "!node_modules/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "crypto-js": "^4.2.0",
+    "electron-log": "^5.4.3",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.7",
+    "minecraft-launcher-core": "^3.17.3"
+  }
+}

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Вход - Minecraft Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('assets/background.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: brightness(0.3) blur(3px);
+            z-index: -1;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(20,30,48,0.9));
+            z-index: -1;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-box {
+            background: rgba(15, 15, 25, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.9);
+            border: 2px solid rgba(76, 175, 80, 0.6);
+            width: 450px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+            font-weight: bold;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            color: #4CAF50;
+            border-bottom-color: #4CAF50;
+        }
+
+        .tab:hover {
+            color: #4CAF50;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid rgba(76, 175, 80, 0.6);
+            border-radius: 10px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #000;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(76, 175, 80, 0.7);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+            border: 2px solid #4CAF50;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.3);
+            color: #ff5252;
+            border: 2px solid #ff5252;
+        }
+
+        .offline-btn {
+            margin-top: 15px;
+            background: linear-gradient(135deg, #757575, #616161);
+            font-size: 14px;
+            padding: 12px;
+        }
+
+        .offline-btn:hover {
+            background: linear-gradient(135deg, #616161, #424242);
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <div class="container">
+        <div class="auth-box">
+            <h1>🎮 MINECRAFT LAUNCHER</h1>
+            <p class="subtitle">Войдите или создайте аккаунт</p>
+
+            <!-- Переключатель Вход/Регистрация -->
+            <div class="tabs">
+                <div class="tab active" data-tab="login">Вход</div>
+                <div class="tab" data-tab="register">Регистрация</div>
+            </div>
+
+            <!-- Форма входа -->
+            <div class="form-container active" id="loginForm">
+                <div class="input-group">
+                    <label>👤 Логин:</label>
+                    <input type="text" id="loginUsername" placeholder="Введите логин" autocomplete="username">
+                </div>
+
+                <div class="input-group">
+                    <label>🔒 Пароль:</label>
+                    <input type="password" id="loginPassword" placeholder="Введите пароль" autocomplete="current-password">
+                </div>
+
+                <button class="btn" id="loginBtn">Войти</button>
+                <button class="btn offline-btn" id="offlineBtn">Играть без аккаунта</button>
+
+                <div class="message" id="loginMessage"></div>
+            </div>
+
+            <!-- Форма регистрации -->
+            <div class="form-container" id="registerForm">
+                <div class="input-group">
+                    <label>👤 Логин:</label>
+                    <input type="text" id="regUsername" placeholder="Придумайте логин" autocomplete="username">
+                </div>
+
+                <div class="input-group">
+                    <label>📧 Email:</label>
+                    <input type="email" id="regEmail" placeholder="Введите email" autocomplete="email">
+                </div>
+
+                <div class="input-group">
+                    <label>🔒 Пароль:</label>
+                    <input type="password" id="regPassword" placeholder="Придумайте пароль" autocomplete="new-password">
+                </div>
+
+                <div class="input-group">
+                    <label>🔒 Повторите пароль:</label>
+                    <input type="password" id="regPasswordConfirm" placeholder="Повторите пароль" autocomplete="new-password">
+                </div>
+
+                <button class="btn" id="registerBtn">Зарегистрироваться</button>
+
+                <div class="message" id="registerMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 Auth.html загружен');
+        
+        const { ipcRenderer } = require('electron');
+
+        // Переключение вкладок
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                console.log('📑 Переключение на вкладку:', this.dataset.tab);
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
+                
+                this.classList.add('active');
+                const formId = this.dataset.tab === 'login' ? 'loginForm' : 'registerForm';
+                document.getElementById(formId).classList.add('active');
+            });
+        });
+
+        // Вход
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            console.log('🔐 Попытка входа');
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const messageEl = document.getElementById('loginMessage');
+
+            if (!username || !password) {
+                showMessage(messageEl, 'Заполните все поля', 'error');
+                return;
+            }
+
+            try {
+                const result = await ipcRenderer.invoke('login', { username, password });
+                console.log('Результат входа:', result);
+
+                if (result.success) {
+                    showMessage(messageEl, result.message, 'success');
+                    setTimeout(() => {
+                        ipcRenderer.send('auth-success', result.user);
+                    }, 1000);
+                } else {
+                    showMessage(messageEl, result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка при входе:', error);
+                showMessage(messageEl, 'Ошибка соединения', 'error');
+            }
+        });
+
+        // Регистрация
+        document.getElementById('registerBtn').addEventListener('click', async () => {
+            console.log('📝 Попытка регистрации');
+            
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+            const messageEl = document.getElementById('registerMessage');
+
+            console.log('Данные регистрации:', { username, email, passwordLength: password.length });
+
+            if (!username || !email || !password || !passwordConfirm) {
+                showMessage(messageEl, 'Заполните все поля', 'error');
+                return;
+            }
+
+            if (username.length < 3) {
+                showMessage(messageEl, 'Логин должен быть минимум 3 символа', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage(messageEl, 'Пароль должен быть минимум 6 символов', 'error');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showMessage(messageEl, 'Пароли не совпадают', 'error');
+                return;
+            }
+
+            try {
+                const result = await ipcRenderer.invoke('register', { username, email, password });
+                console.log('Результат регистрации:', result);
+
+                if (result.success) {
+                    showMessage(messageEl, result.message, 'success');
+                    setTimeout(() => {
+                        // Переключаемся на вход
+                        document.querySelector('[data-tab="login"]').click();
+                        document.getElementById('loginUsername').value = username;
+                    }, 1500);
+                } else {
+                    showMessage(messageEl, result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Ошибка при регистрации:', error);
+                showMessage(messageEl, 'Ошибка соединения', 'error');
+            }
+        });
+
+        // Офлайн режим
+        document.getElementById('offlineBtn').addEventListener('click', () => {
+            console.log('🎮 Офлайн режим');
+            ipcRenderer.send('offline-mode');
+        });
+
+        // Показать сообщение
+        function showMessage(element, text, type) {
+            console.log('💬 Сообщение:', type, text);
+            element.textContent = text;
+            element.className = 'message ' + type;
+            element.style.display = 'block';
+
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Enter для отправки формы
+        document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                console.log('⏎ Enter в логине');
+                document.getElementById('loginBtn').click();
+            }
+        });
+
+        document.getElementById('regPasswordConfirm').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                console.log('⏎ Enter в регистрации');
+                document.getElementById('registerBtn').click();
+            }
+        });
+
+        console.log('✅ Все обработчики событий установлены');
+    </script>
+</body>
+</html>
