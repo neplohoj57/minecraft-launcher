@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Minecraft Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.8);
+        }
+
+        .username {
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .username:hover {
+            color: #667eea;
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            display: flex;
+            padding: 30px;
+            gap: 30px;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .version-select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .version-select:hover {
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .version-select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .play-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .play-btn:active {
+            transform: translateY(0);
+        }
+
+        .play-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Main Panel */
+        .main-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .main-panel h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-box h3 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        /* Status */
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 2px solid rgba(102, 126, 234, 0.3);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer-btn {
+            background: none;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            color: #667eea;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .footer-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #667eea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #667eea;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">🎮 MINECRAFT LAUNCHER</div>
+        <div class="user-info">
+            <img src="" alt="Avatar" class="avatar" id="userAvatar">
+            <span class="username" id="username" onclick="openProfile()">Загрузка...</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>⚙️ Настройки запуска</h2>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-size: 14px; color: rgba(255,255,255,0.8);">
+                    Версия Minecraft
+                </label>
+                <select class="version-select" id="versionSelect">
+                    <option value="">Загрузка версий...</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-size: 14px; color: rgba(255,255,255,0.8);">
+                    Выделенная RAM
+                </label>
+                <select class="version-select">
+                    <option value="2G">2 GB</option>
+                    <option value="4G" selected>4 GB</option>
+                    <option value="6G">6 GB</option>
+                    <option value="8G">8 GB</option>
+                </select>
+            </div>
+
+            <div style="margin-top: auto;">
+                <button class="play-btn" id="playBtn" onclick="launchGame()">
+                    🎮 ИГРАТЬ
+                </button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px; font-size: 14px;">Запуск игры...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <h1>Добро пожаловать!</h1>
+
+            <div class="info-box">
+                <h3>📢 Последние обновления</h3>
+                <p>Версия лаунчера: <span id="appVersion">1.0.0</span></p>
+                <p>Добавлена система автообновлений</p>
+                <p>Поддержка кастомных скинов</p>
+            </div>
+
+            <div class="info-box">
+                <h3>🎮 Как начать играть?</h3>
+                <p>1. Выберите версию Minecraft слева</p>
+                <p>2. Настройте количество RAM (рекомендуется 4GB)</p>
+                <p>3. Нажмите кнопку "ИГРАТЬ"</p>
+                <p>4. Дождитесь загрузки файлов игры</p>
+            </div>
+
+            <div class="info-box">
+                <h3>⚡ Возможности лаунчера</h3>
+                <p>✅ Запуск любой версии Minecraft</p>
+                <p>✅ Автоматические обновления</p>
+                <p>✅ Система аккаунтов с профилями</p>
+                <p>✅ Загрузка кастомных скинов</p>
+                <p>✅ Простой и понятный интерфейс</p>
+            </div>
+
+            <div class="status" id="statusMsg">
+                Готов к запуску
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div>
+            © 2024 Minecraft Launcher | Версия <span id="footerVersion">1.0.0</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="footer-btn" onclick="checkUpdates()">🔄 Проверить обновления</button>
+            <button class="footer-btn" onclick="openProfile()">👤 Профиль</button>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        let currentUser = null;
+
+        // Загрузка данных при открытии
+        async function init() {
+            console.log('🚀 Инициализация главного окна');
+
+            // Загрузка пользователя
+            await loadUser();
+
+            // Загрузка версий
+            await loadVersions();
+
+            // Загрузка версии приложения
+            const version = await ipcRenderer.invoke('get-app-version');
+            document.getElementById('appVersion').textContent = version;
+            document.getElementById('footerVersion').textContent = version;
+
+            console.log('✅ Инициализация завершена');
+        }
+
+        // Загрузка данных пользователя
+        async function loadUser() {
+            try {
+                const result = await ipcRenderer.invoke('get-user');
+                
+                if (result.success) {
+                    currentUser = result.user;
+                    document.getElementById('username').textContent = currentUser.nickname;
+                    
+                    // Установка аватара
+                    if (currentUser.avatar === 'custom' && currentUser.customSkin) {
+                        const skinData = await ipcRenderer.invoke('get-custom-skin');
+                        if (skinData) {
+                            document.getElementById('userAvatar').src = skinData;
+                        }
+                    } else {
+                        document.getElementById('userAvatar').src = `https://minotar.net/avatar/${currentUser.nickname}/100.png`;
+                    }
+                    
+                    console.log('✅ Пользователь загружен:', currentUser.nickname);
+                } else {
+                    console.error('❌ Ошибка загрузки пользователя');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+            }
+        }
+
+        // Загрузка версий Minecraft
+        async function loadVersions() {
+            try {
+                const result = await ipcRenderer.invoke('get-versions');
+                
+                if (result.success) {
+                    const select = document.getElementById('versionSelect');
+                    select.innerHTML = '';
+                    
+                    result.versions.forEach(version => {
+                        const option = document.createElement('option');
+                        option.value = version.id;
+                        option.textContent = version.id + (version.recommended ? ' ⭐ Рекомендуемая' : '');
+                        
+                        if (version.recommended) {
+                            option.selected = true;
+                        }
+                        
+                        select.appendChild(option);
+                    });
+                    
+                    console.log('✅ Версии загружены:', result.versions.length);
+                } else {
+                    console.error('❌ Ошибка загрузки версий');
+                    showStatus('❌ Ошибка загрузки версий', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                showStatus('❌ Ошибка соединения', 'error');
+            }
+        }
+
+        // Запуск игры
+        async function launchGame() {
+            const version = document.getElementById('versionSelect').value;
+            
+            if (!version) {
+                showStatus('❌ Выберите версию!', 'error');
+                return;
+            }
+
+            console.log('🚀 Запуск игры:', version);
+            
+            const playBtn = document.getElementById('playBtn');
+            const loading = document.getElementById('loading');
+            
+            playBtn.style.display = 'none';
+            loading.style.display = 'block';
+            
+            showStatus('🚀 Запуск Minecraft ' + version + '...', 'info');
+
+            try {
+                const result = await ipcRenderer.invoke('launch-minecraft', version);
+                
+                if (result.success) {
+                    showStatus('✅ Игра запущена успешно!', 'success');
+                    console.log('✅ Minecraft запущен');
+                } else {
+                    showStatus('❌ ' + (result.error || 'Ошибка запуска'), 'error');
+                    console.error('❌ Ошибка запуска:', result.error);
+                }
+            } catch (error) {
+                console.error('❌ Критическая ошибка:', error);
+                showStatus('❌ Критическая ошибка запуска', 'error');
+            } finally {
+                playBtn.style.display = 'block';
+                loading.style.display = 'none';
+            }
+        }
+
+        // Открыть профиль
+        function openProfile() {
+            console.log('👤 Открытие профиля');
+            ipcRenderer.send('open-profile');
+        }
+
+        // Проверка обновлений
+        function checkUpdates() {
+            console.log('🔄 Проверка обновлений');
+            showStatus('🔍 Проверка обновлений...', 'info');
+            ipcRenderer.send('check-for-updates');
+        }
+
+        // Показать статус
+        function showStatus(message, type) {
+            const statusMsg = document.getElementById('statusMsg');
+            statusMsg.textContent = message;
+            
+            if (type === 'error') {
+                statusMsg.style.background = 'rgba(244, 67, 54, 0.2)';
+                statusMsg.style.color = '#ff5252';
+                statusMsg.style.borderLeft = '4px solid #ff5252';
+            } else if (type === 'success') {
+                statusMsg.style.background = 'rgba(76, 175, 80, 0.2)';
+                statusMsg.style.color = '#4CAF50';
+                statusMsg.style.borderLeft = '4px solid #4CAF50';
+            } else {
+                statusMsg.style.background = 'rgba(255, 255, 255, 0.1)';
+                statusMsg.style.color = 'rgba(255, 255, 255, 0.7)';
+                statusMsg.style.borderLeft = 'none';
+            }
+        }
+
+        // Обновление пользователя (из профиля)
+        ipcRenderer.on('user-updated', (event, user) => {
+            console.log('🔄 Обновление пользователя');
+            currentUser = user;
+            loadUser();
+        });
+
+        // Обработка событий обновления
+        ipcRenderer.on('update-checking', () => {
+            showStatus('🔍 Проверка обновлений...', 'info');
+        });
+
+        ipcRenderer.on('update-available', (event, version) => {
+            showStatus(`✅ Доступно обновление ${version}! Загрузка...`, 'success');
+        });
+
+        ipcRenderer.on('update-not-available', () => {
+            showStatus('✅ У вас последняя версия!', 'success');
+        });
+
+        ipcRenderer.on('update-error', (event, error) => {
+            showStatus('❌ Ошибка проверки обновлений', 'error');
+        });
+
+        ipcRenderer.on('update-progress', (event, percent) => {
+            showStatus(`📥 Загрузка обновления: ${percent}%`, 'info');
+        });
+
+        ipcRenderer.on('update-downloaded', (event, version) => {
+            showStatus(`✅ Обновление ${version} загружено! Перезапуск через 5 сек...`, 'success');
+        });
+
+        // Инициализация при загрузке
+        window.addEventListener('DOMContentLoaded', init);
+
+        console.log('✅ Index page loaded');
+    </script>
+</body>
+</html>

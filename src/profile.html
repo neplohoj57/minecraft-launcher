@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль - Minecraft Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .profile-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .profile-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .avatar-option {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            object-fit: cover;
+        }
+
+        .avatar-option:hover {
+            transform: scale(1.1);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .avatar-option.selected {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+        }
+
+        .custom-skin-upload {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+        }
+
+        .skin-preview {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .skin-preview img {
+            max-width: 200px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-danger {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ff5252;
+            border: 2px solid #ff5252;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ff5252;
+            border: 2px solid #ff5252;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border: 2px solid #4CAF50;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.5);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👤 Профиль пользователя</h1>
+            <p style="color: rgba(255,255,255,0.6); margin-top: 5px;">
+                Управление аккаунтом и настройками
+            </p>
+        </div>
+
+        <div class="message error" id="errorMsg"></div>
+        <div class="message success" id="successMsg"></div>
+
+        <!-- Основная информация -->
+        <div class="profile-section">
+            <h2>📋 Основная информация</h2>
+            <div class="info-row">
+                <span class="info-label">Никнейм:</span>
+                <span class="info-value" id="userNickname">Загрузка...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email:</span>
+                <span class="info-value" id="userEmail">Загрузка...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">ID:</span>
+                <span class="info-value" id="userId">Загрузка...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Дата регистрации:</span>
+                <span class="info-value" id="userCreated">Загрузка...</span>
+            </div>
+        </div>
+
+        <!-- Выбор аватара -->
+        <div class="profile-section">
+            <h2>🎨 Аватар</h2>
+            <div class="avatar-grid" id="avatarGrid">
+                <!-- Аватары загрузятся здесь -->
+            </div>
+        </div>
+
+        <!-- Кастомный скин -->
+        <div class="profile-section">
+            <h2>🖼️ Кастомный скин</h2>
+            <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 15px;">
+                Загрузите свой уникальный скин (PNG, 64x64 или 64x32)
+            </p>
+            
+            <div class="custom-skin-upload">
+                <input type="file" id="skinFile" class="file-input" accept="image/png" onchange="handleSkinUpload()">
+                <label for="skinFile" class="upload-btn">📁 Выбрать файл</label>
+                
+                <div class="skin-preview" id="skinPreview" style="display: none;">
+                    <img src="" alt="Скин" id="skinImage">
+                    <div class="btn-group" style="max-width: 300px; margin: 15px auto 0;">
+                        <button class="btn btn-danger" onclick="deleteSkin()">🗑️ Удалить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Действия -->
+        <div class="profile-section">
+            <h2>⚙️ Действия</h2>
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="window.close()">✖️ Закрыть</button>
+                <button class="btn btn-danger" onclick="logout()">🚪 Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        let currentUser = null;
+        const avatars = [
+            'avatar1.png',
+            'avatar2.png',
+            'avatar3.png',
+            'avatar4.png',
+            'avatar5.png',
+            'avatar6.png',
+            'avatar7.png',
+            'avatar8.png'
+        ];
+
+        // Загрузка профиля
+        async function loadProfile() {
+            try {
+                const result = await ipcRenderer.invoke('get-user');
+                
+                if (result.success) {
+                    currentUser = result.user;
+                    
+                    document.getElementById('userNickname').textContent = currentUser.nickname;
+                    document.getElementById('userEmail').textContent = currentUser.email;
+                    document.getElementById('userId').textContent = currentUser.id;
+                    
+                    const date = new Date(currentUser.createdAt);
+                    document.getElementById('userCreated').textContent = date.toLocaleDateString('ru-RU');
+                    
+                    loadAvatars();
+                    loadCustomSkin();
+                    
+                    console.log('✅ Профиль загружен');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка загрузки профиля:', error);
+                showError('Ошибка загрузки профиля');
+            }
+        }
+
+        // Загрузка аватаров
+        function loadAvatars() {
+            const grid = document.getElementById('avatarGrid');
+            grid.innerHTML = '';
+            
+            avatars.forEach(avatar => {
+                const img = document.createElement('img');
+                img.src = `https://minotar.net/avatar/steve/100.png`; // Заглушка
+                img.className = 'avatar-option';
+                img.dataset.avatar = avatar;
+                
+                if (currentUser.avatar === avatar) {
+                    img.classList.add('selected');
+                }
+                
+                img.onclick = () => selectAvatar(avatar, img);
+                grid.appendChild(img);
+            });
+        }
+
+        // Выбор аватара
+        async function selectAvatar(avatar, element) {
+            try {
+                const result = await ipcRenderer.invoke('update-avatar', avatar);
+                
+                if (result.success) {
+                    document.querySelectorAll('.avatar-option').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    element.classList.add('selected');
+                    
+                    showSuccess('✅ Аватар изменён!');
+                    console.log('✅ Аватар обновлён');
+                } else {
+                    showError(result.error || 'Ошибка смены аватара');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                showError('Ошибка соединения');
+            }
+        }
+
+        // Загрузка кастомного скина
+        async function loadCustomSkin() {
+            if (currentUser.avatar === 'custom' && currentUser.customSkin) {
+                const skinData = await ipcRenderer.invoke('get-custom-skin');
+                
+                if (skinData) {
+                    document.getElementById('skinImage').src = skinData;
+                    document.getElementById('skinPreview').style.display = 'block';
+                }
+            }
+        }
+
+        // Загрузка файла скина
+        async function handleSkinUpload() {
+            const file = document.getElementById('skinFile').files[0];
+            
+            if (!file) return;
+            
+            if (!file.type.match('image/png')) {
+                showError('Только PNG файлы!');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                showError('Размер файла не должен превышать 5MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+                const img = new Image();
+                
+                img.onload = async () => {
+                    if ((img.width === 64 && img.height === 64) || 
+                        (img.width === 64 && img.height === 32)) {
+                        
+                        try {
+                            const result = await ipcRenderer.invoke('upload-custom-skin', e.target.result);
+                            
+                            if (result.success) {
+                                showSuccess('✅ Скин загружен!');
+                                
+                                document.getElementById('skinImage').src = e.target.result;
+                                document.getElementById('skinPreview').style.display = 'block';
+                                
+                                currentUser.avatar = 'custom';
+                                
+                                console.log('✅ Скин загружен');
+                            } else {
+                                showError(result.error || 'Ошибка загрузки скина');
+                            }
+                        } catch (error) {
+                            console.error('❌ Ошибка:', error);
+                            showError('Ошибка загрузки');
+                        }
+                    } else {
+                        showError('Размер скина должен быть 64x64 или 64x32 пикселей!');
+                    }
+                };
+                
+                img.onerror = () => {
+                    showError('Ошибка загрузки изображения');
+                };
+                
+                img.src = e.target.result;
+            };
+            
+            reader.onerror = () => {
+                showError('Ошибка чтения файла');
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        // Удаление кастомного скина
+        async function deleteSkin() {
+            if (!confirm('Удалить кастомный скин?')) return;
+            
+            try {
+                const result = await ipcRenderer.invoke('delete-custom-skin');
+                
+                if (result.success) {
+                    showSuccess('✅ Скин удалён!');
+                    document.getElementById('skinPreview').style.display = 'none';
+                    document.getElementById('skinFile').value = '';
+                    
+                    currentUser.avatar = 'avatar1.png';
+                    loadAvatars();
+                    
+                    console.log('✅ Скин удалён');
+                } else {
+                    showError(result.error || 'Ошибка удаления');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                showError('Ошибка соединения');
+            }
+        }
+
+        // Выход из аккаунта
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+                console.log('🚪 Выход из аккаунта');
+                ipcRenderer.send('logout');
+                window.close();
+            }
+        }
+
+        // Сообщения
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+            
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successMsg = document.getElementById('successMsg');
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+            
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+
+        // Загрузка при открытии
+        window.addEventListener('DOMContentLoaded', loadProfile);
+
+        console.log('✅ Profile page loaded');
+    </script>
+</body>
+</html>
