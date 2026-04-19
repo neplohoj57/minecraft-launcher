@@ -1,6 +1,6 @@
 {
   "name": "minecraft-launcher",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Custom Minecraft Launcher with auto-update and cloud sync",
   "main": "main.js",
   "scripts": {
