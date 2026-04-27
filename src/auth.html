@@ -1,453 +1,348 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Авторизация - Minecraft Launcher</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Launcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #10b981;
+            --primary-glow: rgba(16, 185, 129, 0.4);
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --error: #ef4444;
+            --gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient);
+            color: var(--text-main);
             height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             overflow: hidden;
-        }
-
-        .container {
-            background: rgba(0, 0, 0, 0.85);
-            padding: 40px;
-            border-radius: 20px;
-            width: 400px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        h1 {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-            font-size: 32px;
-            text-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            color: rgba(255, 255, 255, 0.6);
-            transition: all 0.3s;
-            font-weight: bold;
-            border: none;
-            background: transparent;
-            font-size: 14px;
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .tab:hover {
-            color: white;
-        }
-
-        .form-container {
-            display: none;
-        }
-
-        .form-container.active {
-            display: block;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid rgba(102, 126, 234, 0.5);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .input-group input::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-
-        .password-toggle {
             position: relative;
         }
 
-        .password-toggle input {
-            padding-right: 45px;
-        }
-
-        .password-toggle button {
+        body::before, body::after {
+            content: '';
             position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            font-size: 18px;
-            padding: 5px 10px;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
         }
 
-        .password-toggle button:hover {
+        body::before {
+            background: #4f46e5;
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            background: #10b981;
+            bottom: -100px;
+            right: -100px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #3b82f6);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 0 30px var(--primary-glow);
+            font-size: 2.5rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            margin-left: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             color: white;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        input::placeholder {
+            color: #475569;
         }
 
         .btn {
             width: 100%;
-            padding: 15px;
+            padding: 0.875rem;
             border: none;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn:hover {
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
         }
 
-        .btn:active {
+        .btn-primary:active {
             transform: translateY(0);
         }
 
-        .btn:disabled {
-            opacity: 0.5;
+        .btn-primary:disabled {
+            opacity: 0.7;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .switch-mode {
             text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .switch-mode a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .switch-mode a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            margin-left: 4px;
             display: none;
-            animation: fadeIn 0.3s;
+            animation: shake 0.4s ease-in-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .error {
-            background: rgba(244, 67, 54, 0.2);
-            color: #ff5252;
-            border: 2px solid #ff5252;
-        }
-
-        .success {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 2px solid #4CAF50;
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .loader {
-            display: none;
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border-top: 3px solid white;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+            display: none;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Minecraft Launcher</h1>
-
-        <div class="tabs">
-            <button class="tab active" data-tab="login">Вход</button>
-            <button class="tab" data-tab="register">Регистрация</button>
+        <div class="header">
+            <div class="logo">⛏️</div>
+            <h1>Добро пожаловать</h1>
+            <p class="subtitle">Войдите в свой аккаунт для начала игры</p>
         </div>
 
-        <div class="message error" id="errorMsg"></div>
-        <div class="message success" id="successMsg"></div>
-
-        <!-- Форма входа -->
-        <div class="form-container active" id="login-form">
-            <div class="input-group">
-                <label>Никнейм</label>
-                <input type="text" id="login-nickname" placeholder="Введите никнейм" autocomplete="username">
+        <form id="authForm">
+            <div class="form-group">
+                <label for="username">Имя пользователя</label>
+                <input type="text" id="username" placeholder="Придумайте никнейм" required autocomplete="off">
+                <div class="error-msg" id="usernameError">Некорректное имя</div>
             </div>
 
-            <div class="input-group password-toggle">
-                <label>Пароль</label>
-                <input type="password" id="login-password" placeholder="Введите пароль" autocomplete="current-password">
-                <button type="button" onclick="togglePassword('login-password')">👁️</button>
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+                <div class="error-msg" id="passwordError">Пароль слишком короткий</div>
             </div>
 
-            <button class="btn" id="loginBtn" onclick="handleLogin()">Войти</button>
-            
-            <div class="loader" id="loginLoader">
-                <div class="spinner"></div>
-            </div>
-        </div>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                <span class="loader" id="btnLoader"></span>
+                <span id="btnText">Войти</span>
+            </button>
+        </form>
 
-        <!-- Форма регистрации -->
-        <div class="form-container" id="register-form">
-            <div class="input-group">
-                <label>Никнейм</label>
-                <input type="text" id="register-nickname" placeholder="3-16 символов" autocomplete="username">
-            </div>
-
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="register-email" placeholder="example@mail.com" autocomplete="email">
-            </div>
-
-            <div class="input-group password-toggle">
-                <label>Пароль</label>
-                <input type="password" id="register-password" placeholder="Минимум 6 символов" autocomplete="new-password">
-                <button type="button" onclick="togglePassword('register-password')">👁️</button>
-            </div>
-
-            <div class="input-group password-toggle">
-                <label>Повторите пароль</label>
-                <input type="password" id="register-password-confirm" placeholder="Повторите пароль" autocomplete="new-password">
-                <button type="button" onclick="togglePassword('register-password-confirm')">👁️</button>
-            </div>
-
-            <button class="btn" id="registerBtn" onclick="handleRegister()">Зарегистрироваться</button>
-            
-            <div class="loader" id="registerLoader">
-                <div class="spinner"></div>
-            </div>
+        <div class="switch-mode">
+            <span id="switchText">Нет аккаунта?</span>
+            <a href="#" id="switchLink">Зарегистрироваться</a>
         </div>
     </div>
 
     <script>
-        const { ipcRenderer } = require('electron');
+        const form = document.getElementById('authForm');
+        const switchLink = document.getElementById('switchLink');
+        const switchText = document.getElementById('switchText');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
 
-        // Переключение вкладок
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                const target = tab.dataset.tab;
-
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
-
-                tab.classList.add('active');
-                document.getElementById(`${target}-form`).classList.add('active');
-
-                hideMessages();
-            });
-        });
-
-        // Показать/скрыть пароль
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const button = input.nextElementSibling;
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.textContent = '🙈';
+        window.electronAPI.onAuthModeChange((mode) => {
+            if (mode === 'register') {
+                switchText.textContent = 'Уже есть аккаунт?';
+                switchLink.textContent = 'Войти';
+                btnText.textContent = 'Создать аккаунт';
             } else {
-                input.type = 'password';
-                button.textContent = '👁️';
-            }
-        }
-
-        function showError(message) {
-            const errorMsg = document.getElementById('errorMsg');
-            errorMsg.textContent = message;
-            errorMsg.style.display = 'block';
-            document.getElementById('successMsg').style.display = 'none';
-        }
-
-        function showSuccess(message) {
-            const successMsg = document.getElementById('successMsg');
-            successMsg.textContent = message;
-            successMsg.style.display = 'block';
-            document.getElementById('errorMsg').style.display = 'none';
-        }
-
-        function hideMessages() {
-            document.getElementById('errorMsg').style.display = 'none';
-            document.getElementById('successMsg').style.display = 'none';
-        }
-
-        function setLoading(isLoading, type) {
-            const btn = document.getElementById(type + 'Btn');
-            const loader = document.getElementById(type + 'Loader');
-            
-            btn.disabled = isLoading;
-            loader.style.display = isLoading ? 'block' : 'none';
-        }
-
-        // Вход
-        async function handleLogin() {
-            hideMessages();
-
-            const nickname = document.getElementById('login-nickname').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!nickname || !password) {
-                showError('Заполните все поля!');
-                return;
-            }
-
-            if (nickname.length < 3) {
-                showError('Никнейм минимум 3 символа!');
-                return;
-            }
-
-            if (password.length < 6) {
-                showError('Пароль минимум 6 символов!');
-                return;
-            }
-
-            setLoading(true, 'login');
-
-            try {
-                const result = await ipcRenderer.invoke('auth-login', { nickname, password });
-
-                if (result.success) {
-                    showSuccess('✅ Вход выполнен!');
-                } else {
-                    showError(result.error || 'Ошибка входа');
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showError('Ошибка соединения');
-            } finally {
-                setLoading(false, 'login');
-            }
-        }
-
-        // Регистрация
-        async function handleRegister() {
-            hideMessages();
-
-            const nickname = document.getElementById('register-nickname').value.trim();
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value;
-            const passwordConfirm = document.getElementById('register-password-confirm').value;
-
-            if (!nickname || !email || !password || !passwordConfirm) {
-                showError('Заполните все поля!');
-                return;
-            }
-
-            if (nickname.length < 3 || nickname.length > 16) {
-                showError('Никнейм: 3-16 символов!');
-                return;
-            }
-
-            if (!/^[a-zA-Z0-9_]+$/.test(nickname)) {
-                showError('Никнейм: только буквы, цифры и _');
-                return;
-            }
-
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                showError('Некорректный email!');
-                return;
-            }
-
-            if (password.length < 6) {
-                showError('Пароль минимум 6 символов!');
-                return;
-            }
-
-            if (password !== passwordConfirm) {
-                showError('Пароли не совпадают!');
-                return;
-            }
-
-            setLoading(true, 'register');
-
-            try {
-                const result = await ipcRenderer.invoke('auth-register', { nickname, email, password });
-
-                if (result.success) {
-                    showSuccess('✅ Регистрация успешна! Входим...');
-                    
-                    setTimeout(async () => {
-                        await ipcRenderer.invoke('auth-login', { nickname, password });
-                    }, 1500);
-                } else {
-                    showError(result.error || 'Ошибка регистрации');
-                }
-            } catch (error) {
-                console.error('Register error:', error);
-                showError('Ошибка соединения');
-            } finally {
-                setLoading(false, 'register');
-            }
-        }
-
-        // Enter для отправки
-        document.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                if (document.getElementById('login-form').classList.contains('active')) {
-                    handleLogin();
-                } else {
-                    handleRegister();
-                }
+                switchText.textContent = 'Нет аккаунта?';
+                switchLink.textContent = 'Зарегистрироваться';
+                btnText.textContent = 'Войти';
             }
         });
 
-        // Фокус на первое поле
-        document.getElementById('login-nickname').focus();
+        switchLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.electronAPI.toggleAuthMode();
+        });
 
-        console.log('✅ Auth page loaded');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const mode = btnText.textContent.includes('Создать') ? 'register' : 'login';
+
+            let hasError = false;
+            if (username.length < 3) {
+                document.getElementById('usernameError').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('usernameError').style.display = 'none';
+            }
+
+            if (password.length < 4) {
+                document.getElementById('passwordError').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('passwordError').style.display = 'none';
+            }
+
+            if (hasError) return;
+
+            submitBtn.disabled = true;
+            btnLoader.style.display = 'inline-block';
+            btnText.textContent = mode === 'login' ? 'Вход...' : 'Регистрация...';
+
+            try {
+                const result = await window.electronAPI.authenticate(username, password, mode);
+                if (result.success) {
+                    // Success
+                } else {
+                    alert(result.message);
+                    resetButton();
+                }
+            } catch (err) {
+                alert('Ошибка соединения');
+                resetButton();
+            }
+        });
+
+        function resetButton() {
+            submitBtn.disabled = false;
+            btnLoader.style.display = 'none';
+            const mode = btnText.textContent.includes('Создать') ? 'register' : 'login';
+            btnText.textContent = mode === 'login' ? 'Войти' : 'Создать аккаунт';
+        }
     </script>
 </body>
 </html>

@@ -9,61 +9,56 @@ const userDB = new UserDatabase();
 const MinecraftLauncher = require('./src/launcher');
 const AppUpdater = require('./src/updater');
 
-// Установка кодировки консоли
-if (process.platform === 'win32') {
-    process.stdout.setDefaultEncoding('utf8');
-}
-
 let mainWindow;
 let authWindow;
 let profileWindow;
 let updater;
+let currentAuthMode = 'login';
+let settings = { ram: 4, version: '1.20.4' };
 
-// ==================== ФУНКЦИИ ОКОН ====================
-
-function checkAuth() {
-    const userId = store.get('userId');
-    return userId ? userDB.getUserById(userId) : null;
-}
+// ==================== ОКНА ====================
 
 function createAuthWindow() {
+    if (authWindow) return;
+    
     authWindow = new BrowserWindow({
         width: 450,
-        height: 600,
+        height: 650,
         resizable: false,
         frame: true,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'src/preload.js')
         },
         icon: path.join(__dirname, 'build/icon.ico')
     });
 
     authWindow.loadFile('src/auth.html');
     authWindow.setMenuBarVisibility(false);
+    
+    authWindow.webContents.on('did-finish-load', () => {
+        authWindow.webContents.send('auth-mode-changed', currentAuthMode);
+    });
 
     authWindow.on('closed', () => {
         authWindow = null;
-        if (!checkAuth()) {
-            app.quit();
-        }
     });
-
-    console.log('✅ Окно авторизации создано');
 }
 
 function createMainWindow() {
+    if (mainWindow) return;
+    
     mainWindow = new BrowserWindow({
-        width: 1200,
-        height: 700,
+        width: 1100,
+        height: 750,
         minWidth: 900,
         minHeight: 600,
         frame: true,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'src/preload.js')
         },
         icon: path.join(__dirname, 'build/icon.ico')
     });
@@ -71,14 +66,28 @@ function createMainWindow() {
     mainWindow.loadFile('src/index.html');
     mainWindow.setMenuBarVisibility(false);
 
-    // Инициализация автообновления
     updater = new AppUpdater(mainWindow);
 
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
-
-    console.log('✅ Главное окно создано');
+    
+    // Отправляем инфо о пользователе
+    const userId = store.get('userId');
+    if (userId) {
+        const user = userDB.getUserById(userId);
+        if (user) {
+            setTimeout(() => {
+                mainWindow.webContents.send('user-info', {
+                    username: user.nickname,
+                    id: user.id,
+                    skin: user.customSkin,
+                    gamesPlayed: user.gamesPlayed || 0,
+                    playTime: user.playTime || 0
+                });
+            }, 500);
+        }
+    }
 }
 
 function createProfileWindow() {
@@ -89,36 +98,60 @@ function createProfileWindow() {
 
     profileWindow = new BrowserWindow({
         width: 500,
-        height: 650,
+        height: 700,
         resizable: false,
         parent: mainWindow,
         modal: true,
         frame: true,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true
-        },
-        icon: path.join(__dirname, 'build/icon.ico')
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'src/preload.js')
+        }
     });
 
     profileWindow.loadFile('src/profile.html');
     profileWindow.setMenuBarVisibility(false);
 
+    const userId = store.get('userId');
+    if (userId) {
+        const user = userDB.getUserById(userId);
+        if (user) {
+            profileWindow.webContents.on('did-finish-load', () => {
+                profileWindow.webContents.send('user-info', {
+                    username: user.nickname,
+                    id: user.id,
+                    skin: user.customSkin,
+                    gamesPlayed: user.gamesPlayed || 0,
+                    playTime: user.playTime || 0
+                });
+            });
+        }
+    }
+
     profileWindow.on('closed', () => {
         profileWindow = null;
     });
-
-    console.log('✅ Окно профиля создано');
 }
 
-// ==================== IPC ОБРАБОТЧИКИ ====================
+// ==================== IPC ====================
 
-// Авторизация
-ipcMain.handle('auth-login', async (event, data) => {
-    console.log('🔐 Вход:', data.nickname);
-    const result = userDB.login(data.nickname, data.password);
+ipcMain.on('toggle-auth-mode', () => {
+    currentAuthMode = currentAuthMode === 'login' ? 'register' : 'login';
+    if (authWindow) {
+        authWindow.webContents.send('auth-mode-changed', currentAuthMode);
+    }
+});
+
+ipcMain.handle('authenticate', async (event, { username, password, mode }) => {
+    let result;
     
+    if (mode === 'register') {
+        result = userDB.register(username, username + '@example.com', password);
+    } else {
+        result = userDB.login(username, password);
+    }
+
     if (result.success) {
         store.set('userId', result.user.id);
         store.set('userNickname', result.user.nickname);
@@ -126,71 +159,11 @@ ipcMain.handle('auth-login', async (event, data) => {
         if (authWindow) authWindow.close();
         createMainWindow();
     }
-    
-    return result;
-});
 
-ipcMain.handle('auth-register', async (event, data) => {
-    console.log('📝 Регистрация:', data.nickname);
-    return userDB.register(data.nickname, data.email, data.password);
-});
-
-// Пользователь
-ipcMain.handle('get-user', async () => {
-    const userId = store.get('userId');
-    if (!userId) return { success: false, error: 'Не авторизован' };
-    
-    const user = userDB.getUserById(userId);
-    return user ? { success: true, user } : { success: false, error: 'Не найден' };
-});
-
-ipcMain.on('open-profile', () => {
-    console.log('👤 Открытие профиля');
-    createProfileWindow();
-});
-
-ipcMain.handle('update-avatar', async (event, avatar) => {
-    const userId = store.get('userId');
-    if (!userId) return { success: false, error: 'Не авторизован' };
-    
-    const result = userDB.updateAvatar(userId, avatar);
-    if (result.success && mainWindow) {
-        mainWindow.webContents.send('user-updated', result.user);
-    }
-    return result;
-});
-
-ipcMain.handle('upload-custom-skin', async (event, skinData) => {
-    const userId = store.get('userId');
-    if (!userId) return { success: false, error: 'Не авторизован' };
-    
-    const result = userDB.uploadCustomSkin(userId, skinData);
-    if (result.success && mainWindow) {
-        const user = userDB.getUserById(userId);
-        mainWindow.webContents.send('user-updated', user);
-    }
-    return result;
-});
-
-ipcMain.handle('get-custom-skin', async () => {
-    const userId = store.get('userId');
-    return userId ? userDB.getCustomSkin(userId) : null;
-});
-
-ipcMain.handle('delete-custom-skin', async () => {
-    const userId = store.get('userId');
-    if (!userId) return { success: false, error: 'Не авторизован' };
-    
-    const result = userDB.deleteCustomSkin(userId);
-    if (result.success && mainWindow) {
-        const user = userDB.getUserById(userId);
-        mainWindow.webContents.send('user-updated', user);
-    }
     return result;
 });
 
 ipcMain.on('logout', () => {
-    console.log('🚪 Выход');
     store.delete('userId');
     store.delete('userNickname');
     
@@ -200,61 +173,111 @@ ipcMain.on('logout', () => {
     createAuthWindow();
 });
 
-// Minecraft
-ipcMain.handle('launch-minecraft', async (event, version) => {
-    console.log('🚀 Запуск Minecraft:', version);
-    
+ipcMain.on('update-ram', (event, ram) => {
+    settings.ram = parseInt(ram);
+    console.log('RAM:', settings.ram + 'GB');
+});
+
+ipcMain.on('update-version', (event, version) => {
+    settings.version = version;
+    console.log('Version:', version);
+});
+
+ipcMain.on('launch-game', async () => {
     const userId = store.get('userId');
     const user = userDB.getUserById(userId);
-    
-    if (!user) return { success: false, error: 'Не авторизован' };
-    
+
+    if (!user || !mainWindow) {
+        mainWindow?.webContents.send('game-launch-result', { success: false, message: 'Не авторизован' });
+        return;
+    }
+
     try {
         const launcher = new MinecraftLauncher();
-        return await launcher.launch(version, user.nickname);
+        
+        launcher.on('progress', (percent, message) => {
+            mainWindow.webContents.send('launch-progress', percent, message);
+        });
+
+        const result = await launcher.launch(settings.version, user.nickname, settings.ram);
+        
+        if (result.success) {
+            userDB.incrementGamesPlayed(user.id);
+            mainWindow.webContents.send('game-launch-result', { success: true });
+        } else {
+            mainWindow.webContents.send('game-launch-result', { success: false, message: result.error });
+        }
     } catch (error) {
-        console.error('❌ Ошибка:', error);
-        return { success: false, error: error.message };
+        mainWindow.webContents.send('game-launch-result', { success: false, message: error.message });
     }
 });
 
-ipcMain.handle('get-versions', async () => {
-    try {
-        const launcher = new MinecraftLauncher();
-        return await launcher.getVersions();
-    } catch (error) {
-        return { success: false, error: error.message };
+ipcMain.on('open-profile', () => {
+    createProfileWindow();
+});
+
+ipcMain.on('go-back', () => {
+    if (profileWindow) profileWindow.close();
+});
+
+ipcMain.handle('upload-skin', async (event, skinData) => {
+    const userId = store.get('userId');
+    if (!userId) return { success: false, message: 'Не авторизован' };
+
+    const result = userDB.uploadCustomSkin(userId, skinData);
+    
+    if (result.success && mainWindow) {
+        const user = userDB.getUserById(userId);
+        mainWindow.webContents.send('user-info', {
+            username: user.nickname,
+            id: user.id,
+            skin: user.customSkin,
+            gamesPlayed: user.gamesPlayed || 0,
+            playTime: user.playTime || 0
+        });
     }
+    
+    return result;
 });
 
-// Обновления
-ipcMain.on('check-for-updates', () => {
-    console.log('🔍 Ручная проверка обновлений');
-    if (updater) updater.checkForUpdates();
+ipcMain.handle('save-profile', async (event, skinData) => {
+    const userId = store.get('userId');
+    if (!userId) return { success: false };
+
+    if (skinData) {
+        await userDB.uploadCustomSkin(userId, skinData);
+    }
+    
+    return { success: true };
 });
 
-// Утилиты
-ipcMain.handle('show-open-dialog', async (event, options) => {
-    return await dialog.showOpenDialog(options);
+ipcMain.on('delete-account', () => {
+    const userId = store.get('userId');
+    if (userId) {
+        userDB.deleteUser(userId);
+        store.delete('userId');
+        store.delete('userNickname');
+    }
+    
+    if (profileWindow) profileWindow.close();
+    if (mainWindow) mainWindow.close();
+    
+    createAuthWindow();
 });
 
-ipcMain.handle('get-app-version', () => {
-    return app.getVersion();
+ipcMain.invoke('get-platform', () => {
+    return process.platform === 'win32' ? 'Windows' : 
+           process.platform === 'darwin' ? 'macOS' : 'Linux';
 });
 
 // ==================== ЗАПУСК ====================
 
 app.whenReady().then(() => {
-    console.log('🚀 Приложение запущено');
-    console.log('📂 Путь:', app.getPath('userData'));
-    
     const user = checkAuth();
     
     if (user) {
-        console.log('✅ Авторизован:', user.nickname);
         createMainWindow();
     } else {
-        console.log('❌ Не авторизован');
         createAuthWindow();
     }
 
@@ -265,16 +288,16 @@ app.whenReady().then(() => {
     });
 });
 
+function checkAuth() {
+    const userId = store.get('userId');
+    return userId ? userDB.getUserById(userId) : null;
+}
+
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    if (process.platform !== 'darwin') app.quit();
 });
 
 process.on('uncaughtException', (error) => {
-    console.error('💥 Критическая ошибка:', error);
-    dialog.showErrorBox('Ошибка', error.message);
+    console.error('Critical error:', error);
     app.quit();
 });
-
-console.log('✅ Main.js загружен');

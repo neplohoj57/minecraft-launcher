@@ -2,18 +2,21 @@ const { Client } = require('minecraft-launcher-core');
 const path = require('path');
 const { app } = require('electron');
 const fs = require('fs');
+const EventEmitter = require('events');
 
-class MinecraftLauncher {
+class MinecraftLauncher extends EventEmitter {
     constructor() {
+        super();
         this.minecraftPath = path.join(app.getPath('userData'), 'minecraft');
-        
+        this.settings = { ram: 4, version: '1.20.4' };
+
         if (!fs.existsSync(this.minecraftPath)) {
             fs.mkdirSync(this.minecraftPath, { recursive: true });
         }
     }
 
-    async launch(version, username) {
-        console.log(`🚀 Запуск Minecraft ${version} для ${username}`);
+    async launch(version, username, ram = 4) {
+        console.log(`🚀 Запуск Minecraft ${version} для ${username} (RAM: ${ram}GB)`);
 
         try {
             const launcher = new Client();
@@ -32,20 +35,28 @@ class MinecraftLauncher {
                     type: 'release'
                 },
                 memory: {
-                    max: '4G',
+                    max: `${ram}G`,
                     min: '2G'
                 }
             };
 
-            launcher.launch(opts);
-
             launcher.on('progress', (e) => {
-                console.log(`[PROGRESS] ${e.type}: ${e.task} ${e.percent}%`);
+                const percent = Math.round(e.percent || 0);
+                const message = `${e.type}: ${e.task || 'Загрузка'} (${percent}%)`;
+                this.emit('progress', percent, message);
+                console.log(`[PROGRESS] ${message}`);
             });
 
             launcher.on('close', (code) => {
                 console.log(`[CLOSE] Code: ${code}`);
+                this.emit('progress', 100, 'Игра закрыта');
             });
+
+            launcher.on('data', (data) => {
+                console.log(`[DATA] ${data}`);
+            });
+
+            await launcher.launch(opts);
 
             return { success: true, message: 'Игра запущена!' };
         } catch (error) {

@@ -346,7 +346,8 @@
     </div>
 
     <script>
-        const { ipcRenderer } = require('electron');
+        // Используем безопасный API через preload
+        const api = window.electronAPI;
 
         let currentUser = null;
 
@@ -361,7 +362,7 @@
             await loadVersions();
 
             // Загрузка версии приложения
-            const version = await ipcRenderer.invoke('get-app-version');
+            const version = await api.getAppVersion();
             document.getElementById('appVersion').textContent = version;
             document.getElementById('footerVersion').textContent = version;
 
@@ -371,7 +372,7 @@
         // Загрузка данных пользователя
         async function loadUser() {
             try {
-                const result = await ipcRenderer.invoke('get-user');
+                const result = await api.getUser();
                 
                 if (result.success) {
                     currentUser = result.user;
@@ -379,7 +380,7 @@
                     
                     // Установка аватара
                     if (currentUser.avatar === 'custom' && currentUser.customSkin) {
-                        const skinData = await ipcRenderer.invoke('get-custom-skin');
+                        const skinData = await api.getCustomSkin();
                         if (skinData) {
                             document.getElementById('userAvatar').src = skinData;
                         }
@@ -399,7 +400,7 @@
         // Загрузка версий Minecraft
         async function loadVersions() {
             try {
-                const result = await ipcRenderer.invoke('get-versions');
+                const result = await api.getVersions();
                 
                 if (result.success) {
                     const select = document.getElementById('versionSelect');
@@ -448,7 +449,7 @@
             showStatus('🚀 Запуск Minecraft ' + version + '...', 'info');
 
             try {
-                const result = await ipcRenderer.invoke('launch-minecraft', version);
+                const result = await api.launchMinecraft(version);
                 
                 if (result.success) {
                     showStatus('✅ Игра запущена успешно!', 'success');
@@ -469,14 +470,14 @@
         // Открыть профиль
         function openProfile() {
             console.log('👤 Открытие профиля');
-            ipcRenderer.send('open-profile');
+            api.openProfile();
         }
 
         // Проверка обновлений
         function checkUpdates() {
             console.log('🔄 Проверка обновлений');
             showStatus('🔍 Проверка обновлений...', 'info');
-            ipcRenderer.send('check-for-updates');
+            api.checkForUpdates();
         }
 
         // Показать статус
@@ -500,34 +501,22 @@
         }
 
         // Обновление пользователя (из профиля)
-        ipcRenderer.on('user-updated', (event, user) => {
+        api.onUserUpdated((user) => {
             console.log('🔄 Обновление пользователя');
             currentUser = user;
             loadUser();
         });
 
         // Обработка событий обновления
-        ipcRenderer.on('update-checking', () => {
-            showStatus('🔍 Проверка обновлений...', 'info');
-        });
-
-        ipcRenderer.on('update-available', (event, version) => {
+        api.onUpdateAvailable((version) => {
             showStatus(`✅ Доступно обновление ${version}! Загрузка...`, 'success');
         });
 
-        ipcRenderer.on('update-not-available', () => {
+        api.onUpdateNotAvailable(() => {
             showStatus('✅ У вас последняя версия!', 'success');
         });
 
-        ipcRenderer.on('update-error', (event, error) => {
-            showStatus('❌ Ошибка проверки обновлений', 'error');
-        });
-
-        ipcRenderer.on('update-progress', (event, percent) => {
-            showStatus(`📥 Загрузка обновления: ${percent}%`, 'info');
-        });
-
-        ipcRenderer.on('update-downloaded', (event, version) => {
+        api.onUpdateDownloaded((version) => {
             showStatus(`✅ Обновление ${version} загружено! Перезапуск через 5 сек...`, 'success');
         });
 

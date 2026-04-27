@@ -1,506 +1,401 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профиль - Minecraft Launcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --accent: #3b82f6;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --bg-input: rgba(15, 23, 42, 0.6);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --error: #ef4444;
+            --gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            color: white;
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        body::before {
+            background: #4f46e5;
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            background: #10b981;
+            bottom: -100px;
+            right: -100px;
         }
 
         .container {
-            background: rgba(0, 0, 0, 0.85);
-            border-radius: 15px;
-            padding: 30px;
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
+            width: 100%;
+            max-width: 500px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
         }
 
-        .header h1 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 28px;
+        .avatar-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1.5rem;
+            position: relative;
         }
 
-        .profile-section {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .profile-section h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .avatar-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .avatar-option {
+        .avatar {
             width: 100%;
-            aspect-ratio: 1;
-            border-radius: 10px;
-            border: 3px solid transparent;
-            cursor: pointer;
-            transition: all 0.3s;
-            object-fit: cover;
-        }
-
-        .avatar-option:hover {
-            transform: scale(1.1);
-            border-color: rgba(102, 126, 234, 0.5);
-        }
-
-        .avatar-option.selected {
-            border-color: #667eea;
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
-        }
-
-        .custom-skin-upload {
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .upload-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
-        }
-
-        .skin-preview {
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .skin-preview img {
-            max-width: 200px;
-            border-radius: 10px;
-            border: 2px solid #667eea;
-        }
-
-        .info-row {
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+            transition: transform 0.3s;
         }
 
-        .info-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
+        .avatar:hover {
+            transform: scale(1.05);
         }
 
-        .info-value {
-            font-weight: bold;
-            color: white;
-        }
-
-        .btn-group {
+        .avatar-upload {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
+            border: 3px solid var(--bg-dark);
             transition: all 0.3s;
+            font-size: 1.2rem;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .avatar-upload:hover {
+            transform: scale(1.1);
+            background: var(--primary-hover);
+        }
+
+        .username {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-id {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             color: white;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            outline: none;
         }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(102, 126, 234, 0.5);
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
         }
 
-        .btn-danger {
-            background: rgba(244, 67, 54, 0.2);
-            color: #ff5252;
-            border: 2px solid #ff5252;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn:disabled {
+        input:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+        .btn {
+            width: 100%;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            margin-bottom: 0.75rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
             text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .skin-preview {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .skin-image {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            display: none;
+            margin: 0 auto;
+        }
+
+        .skin-image.show {
+            display: block;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
             display: none;
         }
 
-        .error {
-            background: rgba(244, 67, 54, 0.2);
-            color: #ff5252;
-            border: 2px solid #ff5252;
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--primary);
         }
 
-        .success {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 2px solid #4CAF50;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.5);
-            border-radius: 10px;
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>👤 Профиль пользователя</h1>
-            <p style="color: rgba(255,255,255,0.6); margin-top: 5px;">
-                Управление аккаунтом и настройками
-            </p>
+            <div class="avatar-container">
+                <div class="avatar" id="playerAvatar">😐</div>
+                <label class="avatar-upload" for="skinUpload" title="Загрузить скин">
+                    📷
+                    <input type="file" id="skinUpload" accept="image/png" style="display: none;">
+                </label>
+            </div>
+            <h1 class="username" id="username">Игрок</h1>
+            <p class="user-id" id="userId">ID: ---</p>
         </div>
 
-        <div class="message error" id="errorMsg"></div>
-        <div class="message success" id="successMsg"></div>
+        <div class="message" id="message"></div>
 
-        <!-- Основная информация -->
-        <div class="profile-section">
-            <h2>📋 Основная информация</h2>
-            <div class="info-row">
-                <span class="info-label">Никнейм:</span>
-                <span class="info-value" id="userNickname">Загрузка...</span>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="gamesPlayed">0</div>
+                <div class="stat-label">Игр сыграно</div>
             </div>
-            <div class="info-row">
-                <span class="info-label">Email:</span>
-                <span class="info-value" id="userEmail">Загрузка...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">ID:</span>
-                <span class="info-value" id="userId">Загрузка...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Дата регистрации:</span>
-                <span class="info-value" id="userCreated">Загрузка...</span>
+            <div class="stat-card">
+                <div class="stat-value" id="playTime">0ч</div>
+                <div class="stat-label">Время в игре</div>
             </div>
         </div>
 
-        <!-- Выбор аватара -->
-        <div class="profile-section">
-            <h2>🎨 Аватар</h2>
-            <div class="avatar-grid" id="avatarGrid">
-                <!-- Аватары загрузятся здесь -->
-            </div>
+        <div class="form-group">
+            <label>Скин (PNG 64x64 или 64x32)</label>
+            <img class="skin-image" id="skinPreview" alt="Skin Preview">
         </div>
 
-        <!-- Кастомный скин -->
-        <div class="profile-section">
-            <h2>🖼️ Кастомный скин</h2>
-            <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin-bottom: 15px;">
-                Загрузите свой уникальный скин (PNG, 64x64 или 64x32)
-            </p>
-            
-            <div class="custom-skin-upload">
-                <input type="file" id="skinFile" class="file-input" accept="image/png" onchange="handleSkinUpload()">
-                <label for="skinFile" class="upload-btn">📁 Выбрать файл</label>
-                
-                <div class="skin-preview" id="skinPreview" style="display: none;">
-                    <img src="" alt="Скин" id="skinImage">
-                    <div class="btn-group" style="max-width: 300px; margin: 15px auto 0;">
-                        <button class="btn btn-danger" onclick="deleteSkin()">🗑️ Удалить</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Действия -->
-        <div class="profile-section">
-            <h2>⚙️ Действия</h2>
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="window.close()">✖️ Закрыть</button>
-                <button class="btn btn-danger" onclick="logout()">🚪 Выйти</button>
-            </div>
-        </div>
+        <button class="btn btn-primary" id="saveBtn">Сохранить изменения</button>
+        <button class="btn btn-secondary" id="backBtn">Назад</button>
+        <button class="btn btn-danger" id="deleteAccountBtn">Удалить аккаунт</button>
     </div>
 
     <script>
-        const { ipcRenderer } = require('electron');
-
-        let currentUser = null;
-        const avatars = [
-            'avatar1.png',
-            'avatar2.png',
-            'avatar3.png',
-            'avatar4.png',
-            'avatar5.png',
-            'avatar6.png',
-            'avatar7.png',
-            'avatar8.png'
-        ];
-
-        // Загрузка профиля
-        async function loadProfile() {
-            try {
-                const result = await ipcRenderer.invoke('get-user');
-                
-                if (result.success) {
-                    currentUser = result.user;
-                    
-                    document.getElementById('userNickname').textContent = currentUser.nickname;
-                    document.getElementById('userEmail').textContent = currentUser.email;
-                    document.getElementById('userId').textContent = currentUser.id;
-                    
-                    const date = new Date(currentUser.createdAt);
-                    document.getElementById('userCreated').textContent = date.toLocaleDateString('ru-RU');
-                    
-                    loadAvatars();
-                    loadCustomSkin();
-                    
-                    console.log('✅ Профиль загружен');
-                }
-            } catch (error) {
-                console.error('❌ Ошибка загрузки профиля:', error);
-                showError('Ошибка загрузки профиля');
-            }
-        }
-
-        // Загрузка аватаров
-        function loadAvatars() {
-            const grid = document.getElementById('avatarGrid');
-            grid.innerHTML = '';
+        const messageEl = document.getElementById('message');
+        const skinPreview = document.getElementById('skinPreview');
+        
+        // Init
+        window.electronAPI.onUserInfo((info) => {
+            document.getElementById('username').textContent = info.username;
+            document.getElementById('userId').textContent = 'ID: ' + info.id;
             
-            avatars.forEach(avatar => {
-                const img = document.createElement('img');
-                img.src = `https://minotar.net/avatar/steve/100.png`; // Заглушка
-                img.className = 'avatar-option';
-                img.dataset.avatar = avatar;
-                
-                if (currentUser.avatar === avatar) {
-                    img.classList.add('selected');
-                }
-                
-                img.onclick = () => selectAvatar(avatar, img);
-                grid.appendChild(img);
-            });
-        }
-
-        // Выбор аватара
-        async function selectAvatar(avatar, element) {
-            try {
-                const result = await ipcRenderer.invoke('update-avatar', avatar);
-                
-                if (result.success) {
-                    document.querySelectorAll('.avatar-option').forEach(el => {
-                        el.classList.remove('selected');
-                    });
-                    element.classList.add('selected');
-                    
-                    showSuccess('✅ Аватар изменён!');
-                    console.log('✅ Аватар обновлён');
-                } else {
-                    showError(result.error || 'Ошибка смены аватара');
-                }
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
-                showError('Ошибка соединения');
-            }
-        }
-
-        // Загрузка кастомного скина
-        async function loadCustomSkin() {
-            if (currentUser.avatar === 'custom' && currentUser.customSkin) {
-                const skinData = await ipcRenderer.invoke('get-custom-skin');
-                
-                if (skinData) {
-                    document.getElementById('skinImage').src = skinData;
-                    document.getElementById('skinPreview').style.display = 'block';
-                }
-            }
-        }
-
-        // Загрузка файла скина
-        async function handleSkinUpload() {
-            const file = document.getElementById('skinFile').files[0];
-            
-            if (!file) return;
-            
-            if (!file.type.match('image/png')) {
-                showError('Только PNG файлы!');
-                return;
+            if (info.skin) {
+                skinPreview.src = info.skin;
+                skinPreview.classList.add('show');
+                document.getElementById('playerAvatar').style.backgroundImage = `url(${info.skin})`;
+                document.getElementById('playerAvatar').textContent = '';
             }
             
-            if (file.size > 5 * 1024 * 1024) {
-                showError('Размер файла не должен превышать 5MB');
-                return;
-            }
-            
-            const reader = new FileReader();
-            
-            reader.onload = async (e) => {
-                const img = new Image();
-                
-                img.onload = async () => {
-                    if ((img.width === 64 && img.height === 64) || 
-                        (img.width === 64 && img.height === 32)) {
-                        
-                        try {
-                            const result = await ipcRenderer.invoke('upload-custom-skin', e.target.result);
-                            
-                            if (result.success) {
-                                showSuccess('✅ Скин загружен!');
-                                
-                                document.getElementById('skinImage').src = e.target.result;
-                                document.getElementById('skinPreview').style.display = 'block';
-                                
-                                currentUser.avatar = 'custom';
-                                
-                                console.log('✅ Скин загружен');
-                            } else {
-                                showError(result.error || 'Ошибка загрузки скина');
-                            }
-                        } catch (error) {
-                            console.error('❌ Ошибка:', error);
-                            showError('Ошибка загрузки');
-                        }
-                    } else {
-                        showError('Размер скина должен быть 64x64 или 64x32 пикселей!');
-                    }
+            document.getElementById('gamesPlayed').textContent = info.gamesPlayed || 0;
+            document.getElementById('playTime').textContent = (info.playTime || 0) + 'ч';
+        });
+
+        // Skin Upload
+        document.getElementById('skinUpload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    skinPreview.src = event.target.result;
+                    skinPreview.classList.add('show');
+                    showMessage('Скин загружен! Нажмите "Сохранить"', 'success');
                 };
-                
-                img.onerror = () => {
-                    showError('Ошибка загрузки изображения');
-                };
-                
-                img.src = e.target.result;
-            };
-            
-            reader.onerror = () => {
-                showError('Ошибка чтения файла');
-            };
-            
-            reader.readAsDataURL(file);
-        }
-
-        // Удаление кастомного скина
-        async function deleteSkin() {
-            if (!confirm('Удалить кастомный скин?')) return;
-            
-            try {
-                const result = await ipcRenderer.invoke('delete-custom-skin');
-                
-                if (result.success) {
-                    showSuccess('✅ Скин удалён!');
-                    document.getElementById('skinPreview').style.display = 'none';
-                    document.getElementById('skinFile').value = '';
-                    
-                    currentUser.avatar = 'avatar1.png';
-                    loadAvatars();
-                    
-                    console.log('✅ Скин удалён');
-                } else {
-                    showError(result.error || 'Ошибка удаления');
-                }
-            } catch (error) {
-                console.error('❌ Ошибка:', error);
-                showError('Ошибка соединения');
+                reader.readAsDataURL(file);
             }
-        }
+        });
 
-        // Выход из аккаунта
-        function logout() {
-            if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
-                console.log('🚪 Выход из аккаунта');
-                ipcRenderer.send('logout');
-                window.close();
+        // Save
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            if (skinPreview.src && skinPreview.classList.contains('show')) {
+                window.electronAPI.saveProfile(skinPreview.src);
+                showMessage('Профиль сохранён!', 'success');
+            } else {
+                window.electronAPI.saveProfile(null);
+                showMessage('Профиль сохранён!', 'success');
             }
-        }
+        });
 
-        // Сообщения
-        function showError(message) {
-            const errorMsg = document.getElementById('errorMsg');
-            errorMsg.textContent = message;
-            errorMsg.style.display = 'block';
-            document.getElementById('successMsg').style.display = 'none';
-            
-            setTimeout(() => {
-                errorMsg.style.display = 'none';
-            }, 5000);
-        }
+        // Back
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.electronAPI.goBack();
+        });
 
-        function showSuccess(message) {
-            const successMsg = document.getElementById('successMsg');
-            successMsg.textContent = message;
-            successMsg.style.display = 'block';
-            document.getElementById('errorMsg').style.display = 'none';
-            
+        // Delete Account
+        document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+            if (confirm('Вы уверены? Это действие нельзя отменить!')) {
+                window.electronAPI.deleteAccount();
+            }
+        });
+
+        function showMessage(text, type) {
+            messageEl.textContent = text;
+            messageEl.className = 'message ' + type;
+            messageEl.style.display = 'block';
             setTimeout(() => {
-                successMsg.style.display = 'none';
+                messageEl.style.display = 'none';
             }, 3000);
         }
-
-        // Загрузка при открытии
-        window.addEventListener('DOMContentLoaded', loadProfile);
-
-        console.log('✅ Profile page loaded');
     </script>
 </body>
 </html>
