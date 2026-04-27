@@ -1,8 +1,1 @@
-node_modules/
-dist/
-data/
-minecraft/
-.DS_Store
-Thumbs.db
-*.log
-package-lock.json
+Nothing should be ignored based on the provided file changes. The modification of `main.js` is a source code file that should be tracked in version control.

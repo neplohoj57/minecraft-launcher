@@ -8,7 +8,7 @@ class UserDatabase {
         this.dataDir = path.join(app.getPath('userData'), 'data');
         this.dbPath = path.join(this.dataDir, 'users.json');
         this.skinsDir = path.join(this.dataDir, 'skins');
-        
+
         this.ensureDirectories();
         this.loadDatabase();
     }
@@ -58,12 +58,12 @@ class UserDatabase {
 
     register(nickname, email, password) {
         const existing = this.db.users.find(
-            u => u.nickname.toLowerCase() === nickname.toLowerCase() || 
+            u => u.nickname.toLowerCase() === nickname.toLowerCase() ||
                  u.email.toLowerCase() === email.toLowerCase()
         );
 
         if (existing) {
-            return { success: false, error: 'Никнейм или Email уже занят' };
+            return { success: false, message: 'Никнейм или Email уже занят' };
         }
 
         const user = {
@@ -73,6 +73,8 @@ class UserDatabase {
             password: this.hashPassword(password),
             avatar: 'avatar1.png',
             customSkin: null,
+            gamesPlayed: 0,
+            playTime: 0,
             createdAt: new Date().toISOString()
         };
 
@@ -88,11 +90,11 @@ class UserDatabase {
         );
 
         if (!user) {
-            return { success: false, error: 'Пользователь не найден' };
+            return { success: false, message: 'Пользователь не найден' };
         }
 
         if (user.password !== this.hashPassword(password)) {
-            return { success: false, error: 'Неверный пароль' };
+            return { success: false, message: 'Неверный пароль' };
         }
 
         return { success: true, user: this.sanitizeUser(user) };
@@ -105,7 +107,7 @@ class UserDatabase {
 
     updateAvatar(userId, avatar) {
         const user = this.db.users.find(u => u.id === userId);
-        if (!user) return { success: false, error: 'Пользователь не найден' };
+        if (!user) return { success: false, message: 'Пользователь не найден' };
 
         user.avatar = avatar;
         this.saveDatabase();
@@ -114,13 +116,13 @@ class UserDatabase {
 
     uploadCustomSkin(userId, skinData) {
         const user = this.db.users.find(u => u.id === userId);
-        if (!user) return { success: false, error: 'Пользователь не найден' };
+        if (!user) return { success: false, message: 'Пользователь не найден' };
 
         try {
             const skinFileName = `skin_${userId}_${Date.now()}.png`;
             const skinPath = path.join(this.skinsDir, skinFileName);
             const base64Data = skinData.replace(/^data:image\/png;base64,/, '');
-            
+
             fs.writeFileSync(skinPath, base64Data, 'base64');
 
             if (user.customSkin?.filePath && fs.existsSync(user.customSkin.filePath)) {
@@ -133,7 +135,8 @@ class UserDatabase {
 
             return { success: true, skin: user.customSkin };
         } catch (error) {
-            return { success: false, error: 'Ошибка загрузки скина' };
+            console.error('Ошибка загрузки скина:', error);
+            return { success: false, message: 'Ошибка загрузки скина' };
         }
     }
 
@@ -154,7 +157,7 @@ class UserDatabase {
 
     deleteCustomSkin(userId) {
         const user = this.db.users.find(u => u.id === userId);
-        if (!user) return { success: false, error: 'Пользователь не найден' };
+        if (!user) return { success: false, message: 'Пользователь не найден' };
 
         if (user.customSkin?.filePath && fs.existsSync(user.customSkin.filePath)) {
             fs.unlinkSync(user.customSkin.filePath);
@@ -165,6 +168,31 @@ class UserDatabase {
         this.saveDatabase();
 
         return { success: true };
+    }
+
+    incrementGamesPlayed(userId) {
+        const user = this.db.users.find(u => u.id === userId);
+        if (!user) return false;
+
+        user.gamesPlayed = (user.gamesPlayed || 0) + 1;
+        this.saveDatabase();
+        return true;
+    }
+
+    deleteUser(userId) {
+        const userIndex = this.db.users.findIndex(u => u.id === userId);
+        if (userIndex === -1) return false;
+
+        const user = this.db.users[userIndex];
+        
+        // Удаляем скин если есть
+        if (user.customSkin?.filePath && fs.existsSync(user.customSkin.filePath)) {
+            fs.unlinkSync(user.customSkin.filePath);
+        }
+
+        this.db.users.splice(userIndex, 1);
+        this.saveDatabase();
+        return true;
     }
 
     sanitizeUser(user) {
