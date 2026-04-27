@@ -265,7 +265,7 @@ ipcMain.on('delete-account', () => {
     createAuthWindow();
 });
 
-ipcMain.invoke('get-platform', () => {
+ipcMain.handle('get-platform', () => {
     return process.platform === 'win32' ? 'Windows' : 
            process.platform === 'darwin' ? 'macOS' : 'Linux';
 });
