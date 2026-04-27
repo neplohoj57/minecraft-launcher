@@ -34,7 +34,8 @@ function createAuthWindow() {
         frame: true,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            enableRemoteModule: true
         },
         icon: path.join(__dirname, 'build/icon.ico')
     });
@@ -61,7 +62,8 @@ function createMainWindow() {
         frame: true,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            enableRemoteModule: true
         },
         icon: path.join(__dirname, 'build/icon.ico')
     });
@@ -94,7 +96,8 @@ function createProfileWindow() {
         frame: true,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false
+            contextIsolation: false,
+            enableRemoteModule: true
         },
         icon: path.join(__dirname, 'build/icon.ico')
     });

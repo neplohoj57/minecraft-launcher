@@ -1,8 +1,16 @@
+```
+# Dependencies
 node_modules/
-dist/
-data/
-minecraft/
-.DS_Store
-Thumbs.db
+
+# Logs and temp files
 *.log
-package-lock.json
+*.tmp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+```
